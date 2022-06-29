@@ -1,8 +1,7 @@
-from os import name
-import struct
 from markupsafe import string
 from redis import RedisError
 from redis import AuthenticationError
+import redis
 from c import creatapp
 from redis import StrictRedis
 from flask_restful import Resource,Api,abort,reqparse
@@ -35,20 +34,25 @@ def validate_user_token(user_token,id):
 
 
 
-def  generate_auth_token():
+def  generate_auth_token(username,password):
     auth_token = secrets.token_urlsafe()
     auth_id = secrets.token_hex(2)
-    try:
-        redis_conn.set(auth_id,auth_token)
-        redis_conn.expire(auth_id,3600)
-        return True
-    except (RedisError,AuthenticationError ,ConnectionError) as error:
-        print(error)
-        return False
+   
+    if validate_user_password(username,password):
+        try:
+            redis_conn.set(auth_id,auth_token)
+            redis_conn.expire(auth_id,10)
+            return {"id":auth_id,"token":auth_token}
+        except (RedisError,AuthenticationError ,ConnectionError) as error:
+            print(error)
+            return False
+    return False
 
 
 def add_user(username,password):
     user_info = {username:password}
+    if username in redis_conn.hgetall("UsersD").keys():
+        return 5
     try:
         redis_conn.hset("UsersD",mapping=user_info)
         return True
@@ -72,8 +76,8 @@ Cats = {
 
 #reqparse configuration for user auth
 username_password_parser = reqparse.RequestParser()
-username_password_parser.add_argument("username",help ="Username is not a string",required=True)
-username_password_parser.add_argument("password",help="password arguement provided not a string",required=True)
+username_password_parser.add_argument("username",help ="Username is not a string",required=True,location="form")
+username_password_parser.add_argument("password",help="password arguement provided not a string",required=True,location="form")
 
 
 #reqparse configuration for add_cat class 
@@ -106,10 +110,34 @@ class add_cat(Resource):
 
 
 
+class register_user(Resource):
+    def post(self):
+        args = username_password_parser.parse_args()
+        username = args["username"]
+        password = args["password"]
+        user = add_user(username,password)
+        if user == 5:
+            #username already exist
+            return  {"status":401,"Description":"Username taken.Could not add user"},401
+        if user:
+            #passes
+            auth_token = generate_auth_token(username,password)
+            
+            print(auth_token)
+            print(redis_conn.hgetall("UsersD"))
+            return {"status":200,"Description":"User added successfully","auth":auth_token},200
 
+        return  {"status":401,"Description":"Could not add user.Try again later!"},401
+    
+
+
+#cat resource routes
 api.add_resource(cats_info,"/cats/")
 api.add_resource(cat_info,"/cats/<string:cat_name>")
 api.add_resource(add_cat,"/cats/add")
+
+#adding user
+api.add_resource(register_user,"/add_user/")
 
 if (__name__) == "__main__":
     app.run(debug=True)
