@@ -76,8 +76,8 @@ Cats = {
 
 #reqparse configuration for user auth
 username_password_parser = reqparse.RequestParser()
-username_password_parser.add_argument("username",help ="Username is not a string",required=True,location="form")
-username_password_parser.add_argument("password",help="password arguement provided not a string",required=True,location="form")
+username_password_parser.add_argument("username",help ="Username is not a string",required=True)
+username_password_parser.add_argument("password",help="password arguement provided not a string",required=True)
 
 
 #reqparse configuration for add_cat class 
