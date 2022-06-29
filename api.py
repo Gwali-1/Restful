@@ -1,7 +1,5 @@
-from markupsafe import string
 from redis import RedisError
 from redis import AuthenticationError
-import redis
 from c import creatapp
 from redis import StrictRedis
 from flask_restful import Resource,Api,abort,reqparse
