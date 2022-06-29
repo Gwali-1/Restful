@@ -6,7 +6,7 @@ from c import creatapp
 from redis import StrictRedis
 from flask_restful import Resource,Api,abort,reqparse
 import secrets
-from flask import url_for
+
 
 config = {"redis_host":"localhost","redis_port":6379}
 redis_conn = StrictRedis(config["redis_host"],config["redis_port"],decode_responses=True)
