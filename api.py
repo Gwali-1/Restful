@@ -1,19 +1,18 @@
-from asyncio import FastChildWatcher
-from lib2to3.pgen2 import token
-import time
-import redis
-import json
-
+from os import name
+import struct
+from markupsafe import string
 from redis import RedisError
 from redis import AuthenticationError
 from c import creatapp
 from redis import StrictRedis
-from flask_restful import Resource,Api,abort
+from flask_restful import Resource,Api,abort,reqparse
 import secrets
+from flask import url_for
 
 config = {"redis_host":"localhost","redis_port":6379}
 redis_conn = StrictRedis(config["redis_host"],config["redis_port"],decode_responses=True)
 app = creatapp()
+api = Api(app)
 
 
 def validate_user_password(username,password):
@@ -56,3 +55,61 @@ def add_user(username,password):
     except (RedisError,AuthenticationError ,ConnectionError) as error:
         print(error)
         return False
+
+
+
+Cats = {
+    "DevonRexCats":"""
+    The Devon Rex is a relatively newer breed of cats, discovered by accident in the region of Devonshire, England, in 1960 and has been called many things: a pixie cat,
+    an alien cat, a cat that looks like an elf — or a bat. It is also known to behave more like a dog than like a cat.
+    """,
+    "Abyssinian Cats":"""
+    Abys, as they are lovingly called, are elegant and regal-looking, easy to care for and make ideal pets for cat lovers.
+    Lively and expressive, with slightly wedge-shaped heads, half-cupped ears, medium length bodies and well-developed muscles,
+    Abyssinians have long, slender legs and their coats are short and close-lying to their bodies
+    """
+}
+
+#reqparse configuration for user auth
+username_password_parser = reqparse.RequestParser()
+username_password_parser.add_argument("username",help ="Username is not a string",required=True)
+username_password_parser.add_argument("password",help="password arguement provided not a string",required=True)
+
+
+#reqparse configuration for add_cat class 
+cat_info_parser = reqparse.RequestParser(bundle_errors=True)
+cat_info_parser.add_argument("name",required=True)
+cat_info_parser.add_argument("info",required=True)
+
+
+
+#endpoints for Cat resource
+class cats_info(Resource):
+    def get(self):
+        return {"status":"Ok","Cats":Cats},200
+            
+class cat_info(Resource):
+    def get(self,cat_name):
+        if cat_name in Cats.keys():
+            return {"name":cat_name,"info":Cats[cat_name].strip()},200
+
+class add_cat(Resource):
+    def post(self):
+        args = cat_info_parser.parse_args(strict=True)
+        if args["name"] in Cats.keys():
+            Cats[args["name"]] = args["info"]
+            return {"status":"Ok","Description":"Entry already existed hence was updated","Cats":Cats},200
+
+        Cats[args["name"]] = args["info"]
+        return  {"status":"Ok","Description":"Added Succesfuly","Cats":Cats},200
+
+
+
+
+
+api.add_resource(cats_info,"/cats/")
+api.add_resource(cat_info,"/cats/<string:cat_name>")
+api.add_resource(add_cat,"/cats/add")
+
+if (__name__) == "__main__":
+    app.run(debug=True)
