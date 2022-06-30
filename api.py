@@ -150,7 +150,7 @@ class token_verifaction(Resource):
         if validation:
             return {"status":"Ok","User":redis_conn.get(token),"Token":"Active"},200
 
-        return {"status":"Ok","User":redis_conn.get(token),"Token":"Expired"},200
+        return {"status":"Bad","User":redis_conn.get(token),"Token":"Expired"},200
         
 
 

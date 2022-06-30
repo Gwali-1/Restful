@@ -2,6 +2,10 @@ import json
 import requests
 from api import generate_auth_token
 
+
+#sample test for the api endpoints using the requests module to send http requests, checks for expected response code in situations of success and failure
+
+
 def test_cats_info():
     '''Given that when /cats is visited 
         it checks that response is valid
