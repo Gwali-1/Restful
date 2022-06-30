@@ -139,7 +139,6 @@ class register_user(Resource):
         return  {"status":"Bad","Description":"Could not add user.Try again later!"},401
     
 
-
 class token_verifaction(Resource):
     def post(self):
         args = token_auth_parser.parse_args()

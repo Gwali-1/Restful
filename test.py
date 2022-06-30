@@ -113,7 +113,6 @@ def test_resource_false():
          "token":"kjdbsuw4844bdbewgwew7"
 
      })
-
     assert r.status_code == 401
     assert "status","Bad" in r.text
 
