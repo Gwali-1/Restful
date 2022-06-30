@@ -1,6 +1,6 @@
 import json
 import requests
-from api import generate_auth_token
+from api import generate_auth_token,add_user
 
 
 #sample test for the api endpoints using the requests module to send http requests, checks for expected response code in situations of success and failure
@@ -47,7 +47,7 @@ def test_register_user():
        it checks that response code is correct
     '''
     r = requests.post("http://127.0.0.1:5000/api/add_user",json={
-         "username":"testman",
+         "username":"testmassnv",
          "password":"validationman"
 
      })
@@ -60,7 +60,8 @@ def test_token_verification():
     '''Given that when /verify_token/ is visited with correct
         details , response code is correct
     '''
-    auth = generate_auth_token("manjouer","lemon street")
+    add_user("manjouecr","lemon street")
+    auth = generate_auth_token("manjouecr","lemon street")
     r = requests.post("http://127.0.0.1:5000/api/verify_token",json={
          "id":auth["id"],
          "token":auth["token"]
@@ -93,7 +94,8 @@ def test_resource():
     '''Given that when /resource/ is visited
     with correct auth info ,response code is correct
     '''
-    auth = generate_auth_token("manjouer","lemon street")
+    add_user("manjouecsr","lemon street")
+    auth = generate_auth_token("manjouecsr","lemon street")
     r = requests.post("http://127.0.0.1:5000/api/resource",json={
          "id":auth["id"],
          "token":auth["token"]
