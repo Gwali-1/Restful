@@ -1,9 +1,11 @@
+from sys import orig_argv
 from redis import RedisError
 from redis import AuthenticationError
 from c import creatapp
 from redis import StrictRedis
 from flask_restful import Resource,Api,abort,reqparse
 import secrets
+from werkzeug.security import generate_password_hash,check_password_hash
 
 
 config = {"redis_host":"localhost","redis_port":6379}
@@ -16,7 +18,7 @@ api = Api(app)
 def validate_user_password(username,password):
     users = redis_conn.hgetall("UsersD")
     if username in users.keys():
-        if users[username] == password:
+        if check_password_hash(users[username],password):
             return True
     return False
 
@@ -38,7 +40,7 @@ def  generate_auth_token(username,password):
     if validate_user_password(username,password):
         try:
             redis_conn.set(auth_id,auth_token)
-            redis_conn.expire(auth_id,2000)
+            redis_conn.expire(auth_id,3600)
             return {"id":auth_id,"token":auth_token}
         except (RedisError,AuthenticationError ,ConnectionError) as error:
             print(error)
@@ -47,14 +49,15 @@ def  generate_auth_token(username,password):
 
 
 def add_user(username,password):
-    user_info = {username:password}
+    user_info = {username:generate_password_hash(password)}
     if username in redis_conn.hgetall("UsersD").keys():
         return 5
     try:
         redis_conn.hset("UsersD",mapping=user_info)
+        print("ok")
         return True
     except (RedisError,AuthenticationError ,ConnectionError) as error:
-        print(error)
+        print("error")
         return False
 
 
@@ -111,11 +114,17 @@ class add_cat(Resource):
     def post(self):
         args = cat_info_parser.parse_args(strict=True)
         if args["name"] in Cats.keys():
-            Cats[args["name"]] = args["info"]
-            return {"status":"Ok","Description":f"Entry for {args['name']} already existed hence was updated","Cats":Cats},200
+            try:
+                Cats[args["name"]] = args["info"]
+                return {"status":"Ok","Description":f"Entry for {args['name']} already existed hence was updated","Cats":Cats},200
+            except Exception as e:
+                return {"status":"Bad","Description":"Could not add entry"},501
 
-        Cats[args["name"]] = args["info"]
-        return  {"status":"Ok","Description":"Added Succesfuly","Cats":Cats},200
+        try:
+            Cats[args["name"]] = args["info"]
+            return  {"status":"Ok","Description":"Added Succesfuly","Cats":Cats},200
+        except Exception as e:
+            return {"status":"Bad","Description":"Could not add entry"},501
 
 
 
@@ -130,14 +139,17 @@ class register_user(Resource):
             #username already exist
             return  {"status":"Bad","Description":"Username taken.Could not add user"},401
         if user:
-            #passes
+            #passess
+            print(redis_conn.hgetall("UsersD"))
             auth_token = generate_auth_token(username,password)
+            print(auth_token)
             redis_conn.set(auth_token["token"],username)
-            redis_conn.expire(auth_token["token"],2000)
-            return {"status":"Ok","Description":"User added successfully","auth":auth_token,"token expiration":10},200
+            redis_conn.expire(auth_token["token"],3600)
+            return {"status":"Ok","Description":"User added successfully","auth":auth_token,"token expiration":3600},200
 
         return  {"status":"Bad","Description":"Could not add user.Try again later!"},401
     
+
 
 class token_verifaction(Resource):
     def post(self):
@@ -167,18 +179,18 @@ class resource(Resource):
 
 
 #cat resource routes
-api.add_resource(cats_info,"/cats/")
-api.add_resource(cat_info,"/cats/<string:cat_name>")
-api.add_resource(add_cat,"/cats/add")
+api.add_resource(cats_info,"/api/cats/")
+api.add_resource(cat_info,"/api/cats/<string:cat_name>")
+api.add_resource(add_cat,"/api/cats/add")
 
 #adding user
-api.add_resource(register_user,"/add_user/")
+api.add_resource(register_user,"/api/add_user/")
 
 
 #user account  verification
-api.add_resource(token_verifaction,"/verify_token/")
+api.add_resource(token_verifaction,"/api/verify_token/")
 
 #resource endpoint with verification
-api.add_resource(resource,"/resource/")
+api.add_resource(resource,"/api/resource/")
 if (__name__) == "__main__":
     app.run(debug=True)
