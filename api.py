@@ -145,7 +145,6 @@ class token_verifaction(Resource):
         args = token_auth_parser.parse_args()
         id = args["id"]
         token = args["token"]
-        print(args)
         validation = validate_user_token(token,id)
         if validation:
             return {"status":"Ok","User":redis_conn.get(token),"Token":"Active"},200
