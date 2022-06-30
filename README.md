@@ -140,7 +140,6 @@ Connection: close
     "name": "Devon-Rex-Cats",
     "info": "The Devon Rex is a relatively newer breed of cats, discovered by accident in the region of Devonshire, England, in 1960 and has been called many things: a pixie cat,\n    an alien cat, a cat that looks like an elf \u2014 or a bat. It is also known to behave more like a dog than like a cat."
 }
-osake@mairos-MacBook-Pro ~ % 
 
 ```
 
