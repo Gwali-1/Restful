@@ -60,6 +60,12 @@ On success the status code 200 is returned. This endpoint doesnt require any aut
 On failure status code 501 is returned indicating the resource could not be returned. This will most definitley be a server 
 error as no auth is required for this endpoint.
 
+* To run the tests
+
+```
+ pytest test.py
+```
+
 
 
 * GET /api/cats/<string:cat_name>
