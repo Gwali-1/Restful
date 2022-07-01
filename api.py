@@ -1,7 +1,7 @@
 from sys import orig_argv
 from redis import RedisError
 from redis import AuthenticationError
-from c import creatapp
+from app import creatapp
 from redis import StrictRedis
 from flask_restful import Resource,Api,abort,reqparse
 import secrets
@@ -145,9 +145,9 @@ class register_user(Resource):
             print(auth_token)
             redis_conn.set(auth_token["token"],username)
             redis_conn.expire(auth_token["token"],3600)
-            return {"status":"Ok","Description":"User added successfully","auth":auth_token,"token expiration":3600},200
+            return {"status":"Ok","Description":"User added successfully","auth":auth_token,"token expiration time":3600},200
 
-        return  {"status":"Bad","Description":"Could not add user.Try again later!"},401
+        return  {"status":"Bad","Description":"Could not add user.Try again later!"},501
     
 
 
