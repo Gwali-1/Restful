@@ -1,9 +1,8 @@
-from sys import orig_argv
 from redis import RedisError
 from redis import AuthenticationError
 from app import creatapp
 from redis import StrictRedis
-from flask_restful import Resource,Api,abort,reqparse
+from flask_restful import Resource,Api,reqparse
 import secrets
 from werkzeug.security import generate_password_hash,check_password_hash
 
