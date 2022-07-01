@@ -11,6 +11,10 @@ Attached to the repo is a couple of unit test written to test the various endpoi
 All test passed succesfully at the time this was written.
 several imorovements could be added to this api implementaion, for example adding a time restriction to how many tokens could be requested by a particular account.
 
+* To run the tests
+```
+ pytest test.py
+```
 
 
 
@@ -60,11 +64,6 @@ On success the status code 200 is returned. This endpoint doesnt require any aut
 On failure status code 501 is returned indicating the resource could not be returned. This will most definitley be a server 
 error as no auth is required for this endpoint.
 
-* To run the tests
-
-```
- pytest test.py
-```
 
 
 
